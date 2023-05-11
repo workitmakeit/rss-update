@@ -4,9 +4,13 @@ export interface Env {
 	MASTO_KEY: string;
 }
 
+// TODO: there are a lot of ways to trick this, this is just a demo
+
 export default {
 	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
 		// check for rss updates from blog.ollieg.codes/rss/feed.text.xml
+		// TODO: make this configurable
+		// TODO: check if request failed
 		const res = await fetch("https://blog.ollieg.codes/rss/feed.text.xml");
 		const xml = await res.text();
 
