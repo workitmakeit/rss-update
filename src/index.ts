@@ -1,3 +1,5 @@
+const DOMParser = require("dom-parser");
+
 export interface Env {
 	BLOG_STORE: KVNamespace;
 	MASTO_BASE_URL: string;
@@ -15,27 +17,36 @@ export default {
 		const xml = await res.text();
 
 
-		// TODO: use a proper xml parser, this may only work with basic rss feeds that arent malformed
-		// get the newest item title from the rss feed
-		const latest_item_re = xml.match(/<item>(.*?)<\/item>/im);
+		// parse the text
+        const parser = new DOMParser();
+
+        let doc: any;
+
+        try {
+            doc = parser.parseFromString(xml, "text/xml");
+		} catch (e) {
+			console.warn("Failed to parse rss feed");
+			return;
+		}
+		
+		// get the newest item from the rss feed
+		const posts = doc.getElementsByTagName("item");
+		const latest_item = posts[0];
 
 		// no items
-		if (latest_item_re === null) {
+		if (latest_item === null) {
 			console.warn("No items in rss feed");
 			return;
 		}
 
 		// get newest item's title
-		const title_re = latest_item_re[1].match(/<title>(.*?)<\/title>/im);
+		const newest_item_title = latest_item.getElementsByTagName("title")[0];
 
 		// no title
-		if (title_re === null) {
+		if (newest_item_title === null) {
 			console.warn("No title in item");
 			return;
 		}
-
-		// get the newest title
-		const newest_item_title = title_re[1];
 
 		// no item titles
 		if (newest_item_title === null) {
@@ -62,7 +73,6 @@ export default {
 
 
 		// for each post past the newest title in the KV store, post it to mastodon
-		const posts = xml.match(/<item>(.*?)<\/item>/g);
 		if (posts === null) {
 			console.warn("No posts in rss feed (2)");
 			return;
@@ -78,17 +88,18 @@ export default {
 
 		const new_posts = posts.slice(0, newest_title_index);
 		for (const post of new_posts) {
-			const titles = post.match(/<title>(.*?)<\/title>/);
+			// get the title and link from the post
+			const title_el = post.getElementsByTagName("title")[0];
 
 			let title = null;
-			if (titles !== null) {
-				title = titles[1];
+			if (title_el !== null) {
+				title = title_el.textContent;
 			}
 			
-			const links = post.match(/<link>(.*?)<\/link>/);
+			const link_el = post.getElementsByTagName("link")[0];
 			let link = null;
-			if (links !== null) {
-				link = links[1];
+			if (link_el !== null) {
+				link = link_el[1];
 			}
 
 			let content = "New blog post";

@@ -10,5 +10,8 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler publish"
+  },
+  "dependencies": {
+    "dom-parser": "^0.1.6"
   }
 }
