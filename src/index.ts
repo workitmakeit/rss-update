@@ -17,15 +17,23 @@ export default {
 
 		// TODO: use a proper xml parser, this may only work with basic rss feeds that arent malformed
 		// get the newest item title from the rss feed
-		const titles = xml.match(/<title>(.*?)<\/title>/);
+		const latest_item_re = xml.match(/<item>(.*?)<\/item>/im);
 
-		// no titles
-		if (titles === null) {
+		// no items
+		if (latest_item_re === null) {
+			return;
+		}
+
+		// get newest item's title
+		const title_re = latest_item_re[1].match(/<title>(.*?)<\/title>/im);
+
+		// no title
+		if (title_re === null) {
 			return;
 		}
 
 		// get the newest title
-		const newest_item_title = titles[1];
+		const newest_item_title = title_re[1];
 
 		// no item titles
 		if (newest_item_title === null) {
