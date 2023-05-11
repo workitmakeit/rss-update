@@ -36,8 +36,9 @@ export default {
 		// get the latest title from the KV store
 		const kv_newest_title = await env.BLOG_STORE.get("newest_title");
 
-		// if there's no newest title, this is the first run (don't do anything)
+		// if there's no newest title, this is the first run (store title then don't do anything)
 		if (kv_newest_title === null) {
+			await env.BLOG_STORE.put("newest_title", newest_item_title);
 			return;
 		}
 
