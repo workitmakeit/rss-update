@@ -18,6 +18,7 @@ export default {
 
 		if (res.status !== 200) {
 			console.warn("Failed to get rss feed");
+			console.warn(await res.text());
 			return;
 		}
 
@@ -147,6 +148,7 @@ export default {
 
 			if (res.status !== 200) {
 				console.warn("Failed to post to mastodon");
+				console.warn(await res.text());
 				return;
 			}
 		}
