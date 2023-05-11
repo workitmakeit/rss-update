@@ -40,19 +40,20 @@ export default {
 		}
 
 		// get newest item's title
-		const newest_item_title = latest_item.getElementsByTagName("title")[0];
+		const newest_item_title_el = latest_item.getElementsByTagName("title")[0];
 
 		// no title
-		if (newest_item_title === null) {
+		if (newest_item_title_el === null) {
 			console.warn("No title in item");
 			return;
 		}
 
 		// no item titles
-		if (newest_item_title === null) {
+		if (newest_item_title_el === null) {
 			return;
 		}
 
+		const newest_item_title = newest_item_title_el.textContent;
 
 		// get the latest title from the KV store
 		const kv_newest_title = await env.BLOG_STORE.get("newest_title");
