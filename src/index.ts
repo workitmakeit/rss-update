@@ -122,7 +122,7 @@ export default {
 			const link_el = post.getElementsByTagName("link")[0];
 			let link = null;
 			if (link_el !== null) {
-				link = link_el[1];
+				link = link_el.textContent;
 			}
 
 			let content = "New blog post";
