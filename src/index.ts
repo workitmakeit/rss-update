@@ -21,6 +21,7 @@ export default {
 
 		// no items
 		if (latest_item_re === null) {
+			console.warn("No items in rss feed");
 			return;
 		}
 
@@ -29,6 +30,7 @@ export default {
 
 		// no title
 		if (title_re === null) {
+			console.warn("No title in item");
 			return;
 		}
 
@@ -47,12 +49,14 @@ export default {
 		// if there's no newest title, this is the first run (store title then don't do anything)
 		if (kv_newest_title === null) {
 			await env.BLOG_STORE.put("newest_title", newest_item_title);
+			console.log("First run, storing newest title");
 			return;
 		}
 
 
 		// if the newest title from the rss feed is the same as the newest title from the KV store, there's no new posts
 		if (newest_item_title === kv_newest_title) {
+			console.log("No new posts");
 			return;
 		}
 
@@ -60,6 +64,7 @@ export default {
 		// for each post past the newest title in the KV store, post it to mastodon
 		const posts = xml.match(/<item>(.*?)<\/item>/g);
 		if (posts === null) {
+			console.warn("No posts in rss feed (2)");
 			return;
 		}
 
@@ -67,6 +72,7 @@ export default {
 		if (newest_title_index === -1) {
 			// remove from KV store (erroneous title)
 			await env.BLOG_STORE.delete("newest_title");
+			console.warn("Erroneous title in KV store");
 			return;
 		}
 
@@ -97,5 +103,6 @@ export default {
 
 		// update the newest title in the KV store
 		await env.BLOG_STORE.put("newest_title", newest_item_title);
+		console.log("Finished");
 	},
 };
