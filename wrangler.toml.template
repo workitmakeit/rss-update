@@ -1,0 +1,14 @@
+name = "blog-to-masto"
+main = "src/index.ts"
+compatibility_date = "2023-05-11"
+
+[triggers]
+crons = [ "*/30 * * * *" ]
+# default cron: every 30 mins
+
+# create a namespace for the worker and add the id here (name of namespace doesn't have to match the binding name here)
+# if you aren't doing dev work, you can remove the preview_id
+# the preview id must be different from the id
+kv_namespaces = [
+  { binding = "BLOG_STORE", id = "<id>", preview_id = "<id for use in dev mode>" },
+]
