@@ -7,6 +7,7 @@ export interface Env {
 }
 
 // TODO: there are a lot of ways to trick this, this is just a demo
+// TODO: use better method of checking post than title
 
 export default {
 	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
@@ -79,7 +80,16 @@ export default {
 			return;
 		}
 
-		const newest_title_index = posts.findIndex((post) => post.includes(kv_newest_title));
+		// get all title elements in posts
+		const posts_array = Array.from(posts).map((post) => {
+			const title_el = post.getElementsByTagName("title")[0];
+			if (title_el === null) {
+				return null;
+			}
+			return title_el.textContent;
+		});
+
+		const newest_title_index = posts_array.findIndex((post) => post.includes(kv_newest_title));
 		if (newest_title_index === -1) {
 			// remove from KV store (erroneous title)
 			await env.BLOG_STORE.delete("newest_title");
