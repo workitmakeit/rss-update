@@ -15,21 +15,32 @@ export default {
 		// TODO: make this configurable
 		// TODO: check if request failed
 		const res = await fetch("https://blog.ollieg.codes/rss/feed.text.xml");
+
+		if (res.status !== 200) {
+			console.warn("Failed to get rss feed");
+			return;
+		}
+
 		const xml = await res.text();
+
+		if (xml === null) {
+			console.warn("Failed to get rss feed (2)");
+			return;
+		}
 
 
 		// parse the text
-        const parser = new DOMParser();
+		const parser = new DOMParser();
 
-        let doc: any;
+		let doc: any;
 
-        try {
-            doc = parser.parseFromString(xml, "text/xml");
+		try {
+			doc = parser.parseFromString(xml, "text/xml");
 		} catch (e) {
 			console.warn("Failed to parse rss feed");
 			return;
 		}
-		
+
 		// get the newest item from the rss feed
 		const posts = doc.getElementsByTagName("item");
 		const latest_item = posts[0];
@@ -106,7 +117,7 @@ export default {
 			if (title_el !== null) {
 				title = title_el.textContent;
 			}
-			
+
 			const link_el = post.getElementsByTagName("link")[0];
 			let link = null;
 			if (link_el !== null) {
@@ -121,8 +132,24 @@ export default {
 				content += `\n${link}`;
 			}
 			content += "\nThis was posted automatically by https://github.com/obfuscatedgenerated/cf-rss-update-worker";
-		}
 
+			// post to mastodon
+			const res = await fetch(`${env.MASTO_BASE_URL}/api/v1/statuses`, {
+				method: "POST",
+				headers: {
+					"Authorization": `Bearer ${env.MASTO_KEY}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					status: content,
+				}),
+			});
+
+			if (res.status !== 200) {
+				console.warn("Failed to post to mastodon");
+				return;
+			}
+		}
 		// update the newest title in the KV store
 		await env.BLOG_STORE.put("newest_title", newest_item_title);
 		console.log("Finished");
