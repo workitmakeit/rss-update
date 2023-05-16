@@ -12,3 +12,6 @@ kv_namespaces = [
 [triggers]
 crons = [ "*/30 * * * *" ]
 # default cron: every 30 mins
+
+[placement]
+mode = "smart"
